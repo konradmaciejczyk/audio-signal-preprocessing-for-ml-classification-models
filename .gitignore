@@ -1,3 +1,6 @@
 /genres_original
 .ipynb_checkpoints/
 *.csv
+*Zone.Identifier
+*.pyc
+__pycache__/*

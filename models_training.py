@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from classifiers import KNN
+from classifiers import KNN, NearestCentroid
 
 def normalize_data(x_train, x_test):
     scaler = StandardScaler()
@@ -53,10 +53,17 @@ def runKNN(x_train, x_test, y_train, y_test, neighbors = 3):
     my_knn_clf.fit(x_train, y_train)
     print("Testing set score accuracy: {:.2f}% for KNN({})". format(my_knn_clf.score(x_test, y_test)*100, neighbors))
 
+def runNearestCentroid(x_train, x_test, y_train, y_test):
+    my_min_centroid_clf = NearestCentroid()
+    my_min_centroid_clf.fit(x_train, y_train)
+    print("Testing set score accuracy: {:.2f}% for NearestCentroid". format(my_min_centroid_clf.score(x_test, y_test)*100))
+
 if __name__ == '__main__':
     datapd, genres = loadData("./gtzan_dataset.csv")
     datapd = cat_data_handle(datapd)
     x_train, x_test, y_train, y_test = dataSplit(datapd)
     x_train, x_test = normalize_data(x_train, x_test)
 
-    runKNN(x_train, x_test, y_train, y_test)
+    #runKNN(x_train, x_test, y_train, y_test)
+
+    runNearestCentroid(x_train, x_test, y_train, y_test)

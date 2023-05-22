@@ -1,6 +1,6 @@
 import numpy as np 
 
-class Nearest_centroid(object):
+class NearestCentroid(object):
     """A nearest centroid classifier. Similar class to NearestCentroid from module sklearn.neighbors.
     Methods:
         fit(np.array(X_train), np.array(y_train)) - model training method
