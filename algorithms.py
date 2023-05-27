@@ -1,4 +1,23 @@
+#Konrad Maciejczyk, 2023, Wrocław Uniwersity of Science and Technology
+
 import numpy as np 
+
+def fft(samples):
+    """Implementation of Fast Fourier Transform algorithm"""
+    n = len(samples)
+    if n <= 1:
+        return samples
+
+    even = fft(samples[0::2])
+    odd = fft(samples[1::2])
+
+    temp = np.zeros(n).astype(np.complex64)
+
+    for u in range(n // 2):
+        temp[u] = even[u] + np.exp(-2j * np.pi * u / n) * odd[u]
+        temp[u + n // 2] = even[u] - np.exp(-2j * np.pi * u / n) * odd[u]
+
+    return temp
 
 class NearestCentroid(object):
     """A nearest centroid classifier. Similar class to NearestCentroid from module sklearn.neighbors.
@@ -8,28 +27,22 @@ class NearestCentroid(object):
         score(np.array(X_test, y_test)) - method checking accuracy of the model by. Returns float number.
     """
     def __int__(self):
-        self.X = None
-        self.Y = None
         self.repr = None
-
-    def fit(self, X_train, y_train):
-        if X_train.shape[0] != y_train.shape[0]:
-            print(A.shape[0], B.shape[0])
-            raise ValueError("Training and testing sets are not same size")
-
-
-        self.X = X_train
-        self.Y = y_train
-        self.repr = self._find_means()
-
-
-    def _find_means(self):
+        
+    def _find_means(self, x_train, y_train):
         """Auxillary method used for computing feature classes means."""
-        return np.array([np.mean(self.X[self.Y == i], axis = 0) for i in np.unique(self.Y)])
+        return np.array([np.mean(x_train[y_train == i], axis = 0) for i in np.unique(y_train)])
 
     def _find_distance(self, x):
         """Auxillary method for computing distances between one of the testing vector and classes feature means."""
         return np.sqrt(np.sum(np.power(self.repr - x, 2), axis = 1))
+
+    def fit(self, x_train, y_train):
+        if x_train.shape[0] != y_train.shape[0]:
+            print(x_train.shape[0], y_train.shape[0])
+            raise ValueError("Training and testing sets are not same size")
+            
+        self.repr = self._find_means(x_train, y_train)
 
     
     def predict(self, A):
@@ -100,3 +113,4 @@ class KNN:
     def _distance(self, A):
         """Auxillary method for computing distances between one of the testing vector and other training vectors"""
         return np.sqrt(np.sum(np.power(A - self.x_train, 2), axis = 1))
+    
