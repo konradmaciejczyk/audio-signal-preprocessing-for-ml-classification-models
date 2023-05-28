@@ -47,11 +47,21 @@ def showFrequencies(samples, sampling_rate, track="metal.00054", interval_start 
     plt.title(track + f' ({str(interval_start)}s - {str(interval_start + interval_length)}s)')
     plt.show()
 
+def showFeatureCorrelationHeatmap(datapd):
+    pear_corr=datapd.drop(['filename', 'label'], axis=1).corr(method='pearson', numeric_only=True)
+    fig, ax = plt.subplots(figsize=(10,10))
+    im = ax.imshow(pear_corr, interpolation='nearest')
+    plt.title("Feature correlation heatmap")
+    fig.colorbar(im, orientation='vertical', fraction = 0.05)
+
 if __name__ == "__main__":
     #Load CSV
     datapd, genres, dataset_shape = loadCSVtoDataframe('gtzan_extracted_features.csv')
     print(f"Genres ({len(genres)}): ", genres)
     print(f"Objects: {dataset_shape[0]}, features: {dataset_shape[1] - 2}")
+
+    #Show feature correlation heatmap
+    showFeatureCorrelationHeatmap(datapd)
 
     #Load and visualize audio data
     genre = choice(genres)
@@ -72,6 +82,3 @@ if __name__ == "__main__":
 
     #Visualize frequencies
     showFrequencies(samples, sampling_rate, track=f"{genre}.{track}", interval_start = 5, interval_length = 5)
-
-
-    

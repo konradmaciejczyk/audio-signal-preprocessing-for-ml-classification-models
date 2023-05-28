@@ -1,5 +1,4 @@
 #Konrad Maciejczyk, 2023, Wrocław Uniwersity of Science and Technology
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -44,6 +43,8 @@ def trainKNN(x_train, x_test, y_train, y_test, n = 3, perform_test = False):
     if perform_test:
         print("Testing set score accuracy: {:.2f}% for KNN (sklearn) ({} neighbors) \n".format(sklearn_knn_clf.score(_x_test, y_test)*100, n))
 
+    return sklearn_knn_clf
+
 def trainNearestCentroid(x_train, x_test, y_train, y_test, perform_test = False):
     _x_train, _x_test = normalizeData(x_train, x_test)
 
@@ -59,8 +60,10 @@ def trainNearestCentroid(x_train, x_test, y_train, y_test, perform_test = False)
     if perform_test:
         print("Testing set score accuracy: {:.2f}% for NearestCentroid (sklearn) \n".format(sklearn_nearest_centroid_clf.score(_x_test, y_test)*100))
 
+    return sklearn_nearest_centroid_clf
+
 if __name__ == '__main__':
-    datapd = pd.read_csv('features_30_sec.csv')
+    datapd = pd.read_csv('gtzan_extracted_features.csv')
 
     x_train, x_test, y_train, y_test = dataSplit(datapd)
     trainNearestCentroid(x_train, x_test, y_train, y_test, perform_test = True)

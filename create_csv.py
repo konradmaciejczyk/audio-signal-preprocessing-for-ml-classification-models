@@ -1,5 +1,4 @@
 #Konrad Maciejczyk, 2023, Wrocław Uniwersity of Science and Technology
-
 import os
 import csv
 import random
@@ -8,7 +7,7 @@ import numpy as np
 
 from algorithms import fft
 
-def checkCSV(file_path='./', file_name='gtzan_dataset.csv'):
+def checkCSV(file_path='./', file_name='gtzan_extracted_features.csv'):
     files = os.listdir(file_path)
 
     while True:
@@ -60,17 +59,22 @@ def extract_features(dataset_name, probes, sample_section_start, sample_section_
         row = []
         row.append(probe)
         aux = dataset_name + '/' + probe.split('.')[0] + '/' + probe
-        samples, sampling_rate = librosa.load(aux, sr = None, mono = True, offset = 0.0, duration = None) #opening file        
+        try:
+            samples, sampling_rate = librosa.load(aux, sr = None, mono = True, offset = 0.0, duration = None) #opening file
+        except:
+            print(f"Could not load {probe.split('.')[0] + '/' + probe}")        
         samples = samples[sample_section_start * sampling_rate: sample_section_start*sampling_rate + sample_section_length * sampling_rate] #picking interval
         n = len(samples)
         if verbose:
             print(f"Extracting features for {probe} ({idx}/{len(probes)})...")
         harmonics = np.fft.fft(samples)
         #harmonics = fft(samples) #calculating fft
-        m = len(harmonics)
         harmonics = 2.0/n * np.abs(harmonics[:n//2]) #reducing complex domain into real domain
-        for interval in range(0, m, m // feature_amount + 1):
-            feature_value = np.trapz(harmonics[interval: interval + m // 60]) #calculating integral for every interval
+        aux = len(harmonics) // feature_amount
+        for interval in range(0, feature_amount):
+            a = interval * aux
+            b = a + aux
+            feature_value = np.trapz(harmonics[a: b]) #calculating integral for every interval
             row.append(feature_value)
         row.append(probe.split('.')[0])
         rows.append(row)
@@ -104,4 +108,4 @@ if __name__ == '__main__':
     dataset_name = checkDataset()
 
     if csv_name and dataset_name:
-        createDataset(csv_name, dataset_name, probes_per_class = 50, samples_section_start = 15, samples_section_length = 10, feature_amount = 50)
+        createDataset(csv_name, dataset_name, probes_per_class = 100, samples_section_start = 5, samples_section_length = 20, feature_amount = 40)

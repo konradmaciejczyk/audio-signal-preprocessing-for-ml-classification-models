@@ -1,5 +1,4 @@
 #Konrad Maciejczyk, 2023, Wrocław Uniwersity of Science and Technology
-
 import numpy as np 
 
 def fft(samples):
@@ -112,5 +111,4 @@ class KNN:
 
     def _distance(self, A):
         """Auxillary method for computing distances between one of the testing vector and other training vectors"""
-        return np.sqrt(np.sum(np.power(A - self.x_train, 2), axis = 1))
-    
+        return np.sqrt(np.sum(np.power(A - self.x_train, 2), axis = 1))    
