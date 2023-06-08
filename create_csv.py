@@ -46,28 +46,40 @@ def get_probes(dataset_name, classes, probes_per_class, shuffle):
     random.shuffle(probes)
     return probes
 
-def extract_features(dataset_name, probes, sample_section_start, sample_section_length, feature_amount, verbose = True):
+def get_probes(dataset_name, classes, probes_per_class, shuffle):
+    """Selecting probes from dataset."""    
+    probes = []
+    for class_name in classes:
+        files = list(filter(lambda x: x.endswith('.wav'), os.listdir(dataset_name + '/' + class_name + '/')))
+
+        if shuffle:
+            random.shuffle(files)
+
+        for f in files[:probes_per_class]:
+            probes.append(f)
+    
+    random.shuffle(probes)
+    return probes
+
+def extract_features(dataset_name, probes, sample_section_start, sample_section_length, feature_amount):
     """Extracting features by calculating FFT and calculating integral of each interval"""    
     rows = []
-    rows.append(['filename'])
-    #creating head for dataset
-    for i in range(0, feature_amount):
-        rows[0].append(f'feat_{i+1}')
-    rows[0].append('label')
-
-    for idx, probe in enumerate(probes):
+    for probe in probes:
         row = []
         row.append(probe)
         aux = dataset_name + '/' + probe.split('.')[0] + '/' + probe
         try:
-            samples, sampling_rate = librosa.load(aux, sr = None, mono = True, offset = 0.0, duration = None) #opening file
+            samples, sampling_rate = librosa.load(aux, sr = None, mono = True, offset = 0.0, duration = None) #opening file 
         except:
-            print(f"Could not load {probe.split('.')[0] + '/' + probe}")        
-        samples = samples[sample_section_start * sampling_rate: sample_section_start*sampling_rate + sample_section_length * sampling_rate] #picking interval
+            print("Could not load audio file: {}".format(probe.split('.')[0] + '/' + probe))
+            samples = samples[sample_section_start * sampling_rate: sample_section_start*sampling_rate + sample_section_length * sampling_rate] #picking interval
+
         n = len(samples)
-        if verbose:
-            print(f"Extracting features for {probe} ({idx}/{len(probes)})...")
-        harmonics = np.fft.fft(samples)
+        try:
+            harmonics = np.fft.fft(samples)
+        except:
+            print(f"n = {len(samples)}, a: {sample_section_start * sampling_rate}, b: {sample_section_start*sampling_rate + sample_section_length * sampling_rate}")
+        
         #harmonics = fft(samples) #calculating fft
         harmonics = 2.0/n * np.abs(harmonics[:n//2]) #reducing complex domain into real domain
         aux = len(harmonics) // feature_amount
@@ -78,10 +90,9 @@ def extract_features(dataset_name, probes, sample_section_start, sample_section_
             row.append(feature_value)
         row.append(probe.split('.')[0])
         rows.append(row)
-
     return rows
 
-def createDataset(csv_name, dataset_name, classes=['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock'], probes_per_class=100, shuffle=True, samples_section_start = 9, samples_section_length = 3, feature_amount = 60):
+def createDataset(csv_name, dataset_name, classes=['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock'], probes_per_class=100, shuffle=True, samples_section_start = 9, samples_section_length = 3, feature_amount = 60, repeats = 1):
     """
     Parameters:
         csv_name = output csv file for extracted features
@@ -93,15 +104,22 @@ def createDataset(csv_name, dataset_name, classes=['blues', 'classical', 'countr
         sample_section_length = (int) length as seconds corresponding to length of each interval
     """
     probes = get_probes(dataset_name, classes, probes_per_class, shuffle) #picking up probes
-    rows = extract_features(dataset_name, probes, samples_section_start, samples_section_length, feature_amount) #getting calculated features 
-
+    rows = [['filename']]
+    for feat_num in range(feature_amount):
+        rows[0].append(f'feat_{feat_num +1}')
+    rows[0].append('label')
+    
+    for repeat in range(repeats):
+        results = extract_features(dataset_name, probes, samples_section_start + (samples_section_length * repeat), samples_section_length, feature_amount)
+        for result in results:
+            rows.append(result)
+             
     #saving to csv file
     f = open(csv_name, 'w', newline="")   
     writer = csv.writer(f)
     for row in rows:
         writer.writerow(row)
-    f.close() 
-    
+    f.close()    
 
 if __name__ == '__main__':
     csv_name = checkCSV()

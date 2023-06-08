@@ -53,6 +53,26 @@ def showFeatureCorrelationHeatmap(datapd):
     im = ax.imshow(pear_corr, interpolation='nearest')
     plt.title("Feature correlation heatmap")
     fig.colorbar(im, orientation='vertical', fraction = 0.05)
+    plt.show()
+
+def showScore(scores, x, dataset_name, colors):
+    y = []
+
+    for idx, classifier in enumerate(x):
+        y.append(scores[idx, :])
+
+    xpos = np.arange(len(y[0]))
+    barwidth = 0.1
+    plt.figure(figsize = (10, 7))
+    for idx, classifier in enumerate(x):
+        plt.bar(xpos + (0.15 * idx), y[idx], color=colors[idx], width = barwidth, label=classifier)
+
+
+    plt.legend(bbox_to_anchor=(1.0, 1.0), fontsize="20")
+    plt.title(f"{dataset_name} - classifiers predicition accuracy")
+    plt.xlabel("Repeats")
+    plt.ylabel("Scorage in %")
+    plt.show()
 
 if __name__ == "__main__":
     #Load CSV
